@@ -13,6 +13,37 @@ const config = {
     measurementId: "G-2VG51DPL2D"
   }
 
+  // Code to create new user in our Firestore database/documents repository
+  export const createUserProfileDocument = async (userAuth, additionalData) => {
+      if(!userAuth) return;
+
+      //First pull the uid of the authenticated user - whoever authenticated using a 3rd party platform account
+      const userRef = firestore.doc(`users/${userAuth.uid}`);
+      
+      const snapShot = await userRef.get();
+
+      // checks to make sure user is not already part of our database/firestore documents repository. If not, adds them to it
+      if (!snapShot.exists) {
+          const { displayName, email } = userAuth;
+          const createdAt = new Date();
+
+          // error checking in case something happens when creating the new user in our DB
+          try {
+           await userRef.set({
+               displayName,
+               email,
+               createdAt,
+               ...additionalData
+           })
+          } catch (error) {
+            console.log('error creating user', error.message);
+          }
+      }
+    
+      // return the user object for it to be included the below firebase export so it is available to other areas of your app
+     return userRef;
+  };
+
   firebase.initializeApp(config);
 
   export const auth = firebase.auth();
@@ -23,4 +54,3 @@ const config = {
   export const signInWithGoogle = () => auth.signInWithPopup(provider);
 
   export default firebase;
-  
