@@ -12,10 +12,15 @@ import CheckoutPage from './pages/checkout/checkout.component';
 
 import Header from './components/header/header.component';
 
+// The below extended import with addCollectionAndDocuments was only need for the shop data JSON import to firestore
+//import addCollectionAndDocuments, auth, createUserProfileDocument from './firebase/firebase.utils';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
 
 import { setCurrentUser } from './redux/user/user.actions';
 import { selectCurrentUser } from './redux/user/user.selectors';
+
+// The below import was only need for the shop data JSON import to firestore
+//import selectCollectionsForPreview from './redux/shop/shop.selectors';
 
 class App extends React.Component {
     unsubscribeFromAuth = null;
@@ -23,6 +28,9 @@ class App extends React.Component {
     
 
     componentDidMount() {
+
+      // The below line with the collectionsArray reference was only used once to load the JSON data to firestore
+      //const setCurrentUser, collectionsArray = this.props;
       const {setCurrentUser} = this.props;
 
       this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
@@ -40,6 +48,9 @@ class App extends React.Component {
         }
 
       setCurrentUser(userAuth);
+      // Below line is a 1-time use that will load our JSON shop data into Firebase, where we selectively
+      // choose only the title field and items field from our JSON, since the Route and manual ID fields are not needed
+      // addCollectionAndDocuments('collections', collectionsArray.map(({title, items}) => ({title, items})))
      });
     }
 
@@ -71,6 +82,12 @@ class App extends React.Component {
     );
   }  
 }
+
+// Below 4 lines are only for an initial load of JSON data to firestore
+//const mapStateToProps = createStructuredSelector({
+  //currentUser: selectCurrentUser, 
+  //collectionsArray: selectCollectionsForPreview
+//});
 
 const mapStateToProps = createStructuredSelector({
   currentUser: selectCurrentUser

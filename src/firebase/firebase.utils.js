@@ -13,6 +13,8 @@ const config = {
     measurementId: "G-2VG51DPL2D"
   }
 
+  firebase.initializeApp(config);
+
   // Code to create new user in our Firestore database/documents repository
   export const createUserProfileDocument = async (userAuth, additionalData) => {
       if(!userAuth) return;
@@ -44,7 +46,39 @@ const config = {
      return userRef;
   };
 
-  firebase.initializeApp(config);
+// other code in App.js would need to be uncommented to use the below function to add new JSON data to firestore, for now, this is not needed
+  export const addCollectionAndDocuments = async (
+    collectionKey,
+    objectsToAdd
+  ) => {
+    const collectionRef = firestore.collection(collectionKey);
+  
+    const batch = firestore.batch();
+    objectsToAdd.forEach(obj => {
+      const newDocRef = collectionRef.doc();
+      batch.set(newDocRef, obj);
+    });
+  
+    return await batch.commit();
+  };
+  
+  export const convertCollectionsSnapshotToMap = collections => {
+    const transformedCollection = collections.docs.map(doc => {
+      const { title, items } = doc.data();
+  
+      return {
+        routeName: encodeURI(title.toLowerCase()),
+        id: doc.id,
+        title,
+        items
+      };
+    });
+  
+    return transformedCollection.reduce((accumulator, collection) => {
+      accumulator[collection.title.toLowerCase()] = collection;
+      return accumulator;
+    }, {});
+  };
 
   export const auth = firebase.auth();
   export const firestore = firebase.firestore();
